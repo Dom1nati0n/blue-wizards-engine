@@ -1,0 +1,156 @@
+NB ============================================================================
+NB  PARALLEL HARVESTERS - Blue Wizards Engine
+NB ============================================================================
+NB
+NB  Multiple wizards harvest apples from different locations and report
+NB  their findings
+NB
+NB  Demonstrates:
+NB    - FORK for creating parallel wizards
+NB    - LEAP for teleportation
+NB    - APPLE_COLLECT for resource gathering
+NB    - Independent wizard execution
+NB    - Role management
+NB
+NB ============================================================================
+
+NB Load the Blue Wizards engine
+load 'engine/blue_wizards_v29.ijs'
+
+NB Setup apple deposits at various locations
+setup_apple_deposits =: 3 : 0
+  NB Deposit 1: 50 apples at (0, 5, 5)
+  50 cell_put (0 5 5)
+  
+  NB Deposit 2: 30 apples at (0, 10, 5)
+  30 cell_put (0 10 5)
+  
+  NB Deposit 3: 70 apples at (0, 5, 10)
+  70 cell_put (0 5 10)
+  
+  NB Deposit 4: 20 apples at (0, 10, 10)
+  20 cell_put (0 10 10)
+)
+
+NB Build the harvester program
+harvest_program =: i.0
+
+NB Main coordinator: Fork 4 harvesters
+harvest_program =: harvest_program , FORK          NB Clone 1
+harvest_program =: harvest_program , FORK          NB Clone 2
+harvest_program =: harvest_program , FORK          NB Clone 3
+harvest_program =: harvest_program , FORK          NB Clone 4
+
+NB Now we have 5 wizards total (original + 4 clones)
+NB Each needs a unique destination
+
+NB Use wizard ID to determine which deposit to harvest
+NB Get my wizard ID onto stack
+harvest_program =: harvest_program , DIVINE_ROLE   NB Push role (not ID, but we'll use it)
+
+NB Actually, let's use a simpler approach with conditional jumps
+NB We'll use DIVINE_TIME to create variation
+
+NB Get current tick number
+harvest_program =: harvest_program , DIVINE_TIME
+harvest_program =: harvest_program , 5
+harvest_program =: harvest_program , ALCHEMY_MOD   NB tick % 5 (gives 0-4)
+
+NB Based on result, jump to different teleport destinations
+NB Case 0: Jump to handler at 100
+NB Case 1: Jump to handler at 110  
+NB Case 2: Jump to handler at 120
+NB Case 3: Jump to handler at 130
+NB Case 4: Jump to handler at 140
+
+harvest_program =: harvest_program , INV_CLONE
+harvest_program =: harvest_program , RUNE_ISZERO
+harvest_program =: harvest_program , 100 , RITUAL_IFPOS
+
+harvest_program =: harvest_program , INV_CLONE
+harvest_program =: harvest_program , 1 , ALCHEMY_SUB , RUNE_ISZERO
+harvest_program =: harvest_program , 110 , RITUAL_IFPOS
+
+harvest_program =: harvest_program , INV_CLONE
+harvest_program =: harvest_program , 2 , ALCHEMY_SUB , RUNE_ISZERO
+harvest_program =: harvest_program , 120 , RITUAL_IFPOS
+
+harvest_program =: harvest_program , INV_CLONE
+harvest_program =: harvest_program , 3 , ALCHEMY_SUB , RUNE_ISZERO
+harvest_program =: harvest_program , 130 , RITUAL_IFPOS
+
+NB Default case (4 or anything else)
+harvest_program =: harvest_program , 140 , RITUAL_WARP
+
+NB Pad to position 100
+harvest_program =: harvest_program , ((100 - #harvest_program) # MEDITATE)
+
+NB ===== Location 1: (0, 5, 5) =====
+harvest_program =: harvest_program , 0 , 5 , 5 , LEAP
+harvest_program =: harvest_program , 200 , RITUAL_WARP    NB Jump to harvest routine
+
+NB ===== Location 2: (0, 10, 5) =====
+harvest_program =: harvest_program , ((110 - #harvest_program) # MEDITATE)
+harvest_program =: harvest_program , 0 , 10 , 5 , LEAP
+harvest_program =: harvest_program , 200 , RITUAL_WARP
+
+NB ===== Location 3: (0, 5, 10) =====
+harvest_program =: harvest_program , ((120 - #harvest_program) # MEDITATE)
+harvest_program =: harvest_program , 0 , 5 , 10 , LEAP
+harvest_program =: harvest_program , 200 , RITUAL_WARP
+
+NB ===== Location 4: (0, 10, 10) =====
+harvest_program =: harvest_program , ((130 - #harvest_program) # MEDITATE)
+harvest_program =: harvest_program , 0 , 10 , 10 , LEAP
+harvest_program =: harvest_program , 200 , RITUAL_WARP
+
+NB ===== Location 5: Center (0, 7, 7) =====
+harvest_program =: harvest_program , ((140 - #harvest_program) # MEDITATE)
+harvest_program =: harvest_program , 0 , 7 , 7 , LEAP
+harvest_program =: harvest_program , 200 , RITUAL_WARP
+
+NB ===== Harvest Routine (position 200) =====
+harvest_program =: harvest_program , ((200 - #harvest_program) # MEDITATE)
+
+NB Report location
+harvest_program =: harvest_program , 76 , PROPHECY_CHAR   NB 'L'
+harvest_program =: harvest_program , 58 , PROPHECY_CHAR   NB ':'
+harvest_program =: harvest_program , 32 , PROPHECY_CHAR   NB ' '
+
+NB Collect all apples in a loop
+harvest_program =: harvest_program , 0                     NB Initialize counter
+
+NB Loop start (position ~207)
+loop_pos =: #harvest_program
+harvest_program =: harvest_program , SCRIBE_COPY           NB Check cell value
+harvest_program =: harvest_program , INV_CLONE
+harvest_program =: harvest_program , RUNE_ISZERO
+harvest_program =: harvest_program , 230 , RITUAL_IFPOS    NB If empty, finish
+
+NB Collect one apple
+harvest_program =: harvest_program , INV_DROP              NB Drop cell value
+harvest_program =: harvest_program , APPLE_COLLECT
+harvest_program =: harvest_program , 1 , ALCHEMY_ADD       NB Increment counter
+harvest_program =: harvest_program , loop_pos , RITUAL_WARP
+
+NB Finish routine (position 230)
+harvest_program =: harvest_program , ((230 - #harvest_program) # MEDITATE)
+harvest_program =: harvest_program , PROPHECY_NUM          NB Output count
+harvest_program =: harvest_program , 32 , PROPHECY_CHAR    NB Space
+harvest_program =: harvest_program , BANISH_SELF           NB Done
+
+NB Initialize
+init_grid harvest_program
+setup_apple_deposits ''
+
+NB Spawn initial wizard
+spawn_wizard (0 0 0) ; (0 0 1) ; i.0 ; 100 ; 0 ; ROLE_FARMER
+
+NB Run simulation
+run_multi harvest_program ; 1 ; 300 ; 100
+
+echo 'Parallel Harvest Results:'
+echo get_outputs ''
+echo ''
+echo 'Each wizard reports its location and apple count'
+echo 'Expected: Multiple "L: <count>" outputs from different wizards'

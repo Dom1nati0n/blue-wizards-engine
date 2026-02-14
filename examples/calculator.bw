@@ -1,0 +1,102 @@
+NB ============================================================================
+NB  CALCULATOR - Blue Wizards Engine
+NB ============================================================================
+NB
+NB  A calculator that performs various arithmetic operations
+NB
+NB  Demonstrates:
+NB    - All basic alchemy operations (ADD, SUB, MUL, DIV, MOD, POW)
+NB    - Stack manipulation
+NB    - Numeric output
+NB    - Sequential computation
+NB
+NB ============================================================================
+
+NB Load the Blue Wizards engine
+load 'engine/blue_wizards_v29.ijs'
+
+NB Build the calculator program
+calculator =: i.0
+
+NB ===== ADDITION: 15 + 27 = 42 =====
+calculator =: calculator , 15
+calculator =: calculator , 27
+calculator =: calculator , ALCHEMY_ADD
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== SUBTRACTION: 100 - 42 = 58 =====
+calculator =: calculator , 100
+calculator =: calculator , 42
+calculator =: calculator , ALCHEMY_SUB
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== MULTIPLICATION: 6 * 7 = 42 =====
+calculator =: calculator , 6
+calculator =: calculator , 7
+calculator =: calculator , ALCHEMY_MUL
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== DIVISION: 84 / 2 = 42 =====
+calculator =: calculator , 84
+calculator =: calculator , 2
+calculator =: calculator , ALCHEMY_DIV
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== MODULO: 127 % 85 = 42 =====
+calculator =: calculator , 127
+calculator =: calculator , 85
+calculator =: calculator , ALCHEMY_MOD
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== POWER: 2^10 = 1024 =====
+calculator =: calculator , 2
+calculator =: calculator , 10
+calculator =: calculator , ALCHEMY_POW
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== ABSOLUTE VALUE: |-15| = 15 =====
+calculator =: calculator , 15
+calculator =: calculator , ALCHEMY_NEG    NB -15
+calculator =: calculator , ALCHEMY_ABS    NB 15
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== MIN: min(99, 42) = 42 =====
+calculator =: calculator , 99
+calculator =: calculator , 42
+calculator =: calculator , ALCHEMY_MIN
+calculator =: calculator , PROPHECY_NUM
+calculator =: calculator , 32 , PROPHECY_CHAR   NB Space
+
+NB ===== MAX: max(42, 17) = 42 =====
+calculator =: calculator , 42
+calculator =: calculator , 17
+calculator =: calculator , ALCHEMY_MAX
+calculator =: calculator , PROPHECY_NUM
+
+NB ===== Complex expression: (3 + 4) * 5 = 35 =====
+calculator =: calculator , 10 , PROPHECY_CHAR   NB Newline
+calculator =: calculator , 3
+calculator =: calculator , 4
+calculator =: calculator , ALCHEMY_ADD
+calculator =: calculator , 5
+calculator =: calculator , ALCHEMY_MUL
+calculator =: calculator , PROPHECY_NUM
+
+NB Initialize grid and run
+init_grid calculator
+spawn_wizard (0 0 0) ; (0 0 1) ; i.0 ; IMMORTAL ; 0 ; ROLE_WIZARD
+run_multi calculator ; 1 ; 100 ; IMMORTAL
+
+NB Display results
+echo 'Calculator Results:'
+echo get_outputs ''
+echo ''
+echo 'Expected: 42 58 42 42 42 1024 15 42 42'
+echo '          35'

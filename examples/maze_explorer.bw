@@ -1,0 +1,112 @@
+NB ============================================================================
+NB  MAZE EXPLORER - Blue Wizards Engine
+NB ============================================================================
+NB
+NB  A wizard navigates through a simple maze using sensing and conditionals
+NB
+NB  Demonstrates:
+NB    - Movement opcodes (MOVE_EAST, MOVE_NORTH, etc.)
+NB    - Sensing ahead (DIVINE_SCAN)
+NB    - Conditional jumps (RITUAL_IFZERO)
+NB    - Grid interaction
+NB    - Path finding logic
+NB
+NB  Maze layout (on row 0, layer 0):
+NB    Columns: 0  1  2  3  4  5  6  7  8  9
+NB             S  -> -> -> W  -> -> -> -> G
+NB
+NB  S = Start (column 0)
+NB  -> = Path (value 1)
+NB  W = Wall (value 999)
+NB  G = Goal (value 100)
+NB
+NB ============================================================================
+
+NB Load the Blue Wizards engine
+load 'engine/blue_wizards_v29.ijs'
+
+NB First, create the maze on the grid
+NB We'll use row 1 for the maze, row 0 for the program
+create_maze =: 3 : 0
+  NB Set up path
+  1 cell_put (0 1 1)
+  1 cell_put (0 1 2)
+  1 cell_put (0 1 3)
+  999 cell_put (0 1 4)  NB Wall
+  1 cell_put (0 1 5)
+  1 cell_put (0 1 6)
+  1 cell_put (0 1 7)
+  1 cell_put (0 1 8)
+  100 cell_put (0 1 9)  NB Goal
+)
+
+NB Build the pathfinding program
+NB The wizard will:
+NB   1. Look ahead
+NB   2. If path clear (value = 1), continue
+NB   3. If wall (value = 999), turn around
+NB   4. If goal (value = 100), celebrate!
+
+maze_program =: i.0
+
+NB Main loop (starts at position 0)
+loop_start =: 0
+
+NB Look ahead
+maze_program =: maze_program , MOVE_SOUTH         NB Point at maze row
+maze_program =: maze_program , DIVINE_SCAN         NB Check next cell
+maze_program =: maze_program , MOVE_NORTH         NB Point back at program
+
+NB Check if goal (100)
+maze_program =: maze_program , INV_CLONE           NB Duplicate for testing
+maze_program =: maze_program , 100
+maze_program =: maze_program , ALCHEMY_SUB         NB goal - 100 = 0 if goal
+maze_program =: maze_program , RUNE_ISZERO        NB 1 if at goal
+maze_program =: maze_program , (50) , RITUAL_IFPOS NB Jump to victory if at goal
+
+NB Check if wall (999)
+maze_program =: maze_program , INV_CLONE
+maze_program =: maze_program , 999
+maze_program =: maze_program , ALCHEMY_SUB         NB wall - 999 = 0 if wall
+maze_program =: maze_program , RUNE_ISZERO
+maze_program =: maze_program , (40) , RITUAL_IFPOS NB Jump to turn around
+
+NB Path is clear, drop the sensed value and continue
+maze_program =: maze_program , INV_DROP
+maze_program =: maze_program , 46 , PROPHECY_CHAR  NB Output '.'
+maze_program =: maze_program , MEDITATE            NB Wait one turn
+maze_program =: maze_program , (loop_start) , RITUAL_WARP  NB Loop
+
+NB Turn around routine (position ~40)
+maze_program =: maze_program , ((40 - #maze_program) # MEDITATE)
+maze_program =: maze_program , INV_DROP            NB Drop sensed value
+maze_program =: maze_program , 88 , PROPHECY_CHAR  NB Output 'X' (wall hit)
+maze_program =: maze_program , MIRROR              NB Reverse direction
+maze_program =: maze_program , (loop_start) , RITUAL_WARP
+
+NB Victory routine (position ~50)
+maze_program =: maze_program , ((50 - #maze_program) # MEDITATE)
+maze_program =: maze_program , INV_DROP
+NB Output "GOAL!"
+maze_program =: maze_program , 71 , PROPHECY_CHAR  NB G
+maze_program =: maze_program , 79 , PROPHECY_CHAR  NB O
+maze_program =: maze_program , 65 , PROPHECY_CHAR  NB A
+maze_program =: maze_program , 76 , PROPHECY_CHAR  NB L
+maze_program =: maze_program , 33 , PROPHECY_CHAR  NB !
+maze_program =: maze_program , CATACLYSM           NB End simulation
+
+NB Initialize
+init_grid maze_program
+create_maze ''
+
+NB Spawn wizard at start of maze (layer 0, row 1, column 0)
+NB Moving East initially
+spawn_wizard (0 1 0) ; (0 0 1) ; i.0 ; IMMORTAL ; 0 ; ROLE_WIZARD
+
+NB Run simulation
+run_multi maze_program ; 1 ; 200 ; IMMORTAL
+
+echo 'Maze Explorer Output:'
+echo get_outputs ''
+echo ''
+echo 'Expected: Series of dots (.) for movement, X if hitting wall, ending with GOAL!'

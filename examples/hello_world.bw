@@ -1,0 +1,53 @@
+NB ============================================================================
+NB  HELLO WORLD - Blue Wizards Engine
+NB ============================================================================
+NB
+NB  A simple program that outputs "Hello, World!"
+NB
+NB  Demonstrates:
+NB    - Basic output using PROPHECY_STR
+NB    - ASCII character encoding
+NB    - Program structure
+NB
+NB ============================================================================
+
+NB Load the Blue Wizards engine
+load 'engine/blue_wizards_v29.ijs'
+
+NB Define the program
+NB ASCII values for "Hello, World!":
+NB H=72, e=101, l=108, l=108, o=111, ,=44, space=32
+NB W=87, o=111, r=114, l=108, d=100, !=33
+
+hello_world =: i.0
+hello_world =: hello_world , 72    NB H
+hello_world =: hello_world , 101   NB e
+hello_world =: hello_world , 108   NB l
+hello_world =: hello_world , 108   NB l
+hello_world =: hello_world , 111   NB o
+hello_world =: hello_world , 44    NB ,
+hello_world =: hello_world , 32    NB (space)
+hello_world =: hello_world , 87    NB W
+hello_world =: hello_world , 111   NB o
+hello_world =: hello_world , 114   NB r
+hello_world =: hello_world , 108   NB l
+hello_world =: hello_world , 100   NB d
+hello_world =: hello_world , 33    NB !
+hello_world =: hello_world , 13    NB String length
+hello_world =: hello_world , PROPHECY_STR
+
+NB Initialize the grid with our program
+init_grid hello_world
+
+NB Spawn a wizard at origin (0,0,0), moving East (0,0,1)
+NB Starting with empty stack, 10 apples, parent_id 0, role WIZARD
+spawn_wizard (0 0 0) ; (0 0 1) ; i.0 ; 10 ; 0 ; ROLE_WIZARD
+
+NB Run the simulation for 20 steps (enough to execute the program)
+run_multi hello_world ; 1 ; 20 ; 10
+
+NB Display the output
+echo 'Output:'
+echo get_outputs ''
+
+NB Expected output: "Hello, World!"

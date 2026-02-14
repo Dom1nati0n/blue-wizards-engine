@@ -1,0 +1,140 @@
+NB ============================================================================
+NB  REACTIVE KINGDOM - Blue Wizards Engine
+NB ============================================================================
+NB
+NB  Wizards respond to kingdom events using AWAIT_OMEN and REACT
+NB
+NB  Demonstrates:
+NB    - Event-driven programming
+NB    - AWAIT_OMEN (blocking wait)
+NB    - REACT (event handlers)
+NB    - Kingdom event system
+NB    - Asynchronous behavior
+NB
+NB ============================================================================
+
+NB Load the Blue Wizards engine
+load 'engine/blue_wizards_v29.ijs'
+
+NB Build the reactive program
+reactive_program =: i.0
+
+NB Create multiple event handlers
+NB Handler addresses
+goblin_handler =: 100
+prosperity_handler =: 200
+dawn_handler =: 300
+
+NB ===== MAIN PROGRAM =====
+NB Register event handlers
+reactive_program =: reactive_program , EVENT_GOBLIN_RAID , goblin_handler , REACT
+reactive_program =: reactive_program , EVENT_PROSPERITY , prosperity_handler , REACT  
+reactive_program =: reactive_program , EVENT_DAWN , dawn_handler , REACT
+
+NB Main loop: just wait and report
+reactive_program =: reactive_program , 87 , PROPHECY_CHAR    NB 'W' (waiting)
+reactive_program =: reactive_program , MEDITATE , MEDITATE , MEDITATE
+reactive_program =: reactive_program , 3 , RITUAL_WARP        NB Loop forever
+
+NB Pad to position 100
+reactive_program =: reactive_program , ((goblin_handler - #reactive_program) # MEDITATE)
+
+NB ===== GOBLIN RAID HANDLER =====
+NB Output "RAID!"
+reactive_program =: reactive_program , 82 , PROPHECY_CHAR    NB 'R'
+reactive_program =: reactive_program , 65 , PROPHECY_CHAR    NB 'A'
+reactive_program =: reactive_program , 73 , PROPHECY_CHAR    NB 'I'
+reactive_program =: reactive_program , 68 , PROPHECY_CHAR    NB 'D'
+reactive_program =: reactive_program , 33 , PROPHECY_CHAR    NB '!'
+reactive_program =: reactive_program , 32 , PROPHECY_CHAR    NB ' '
+
+NB Get kingdom stats
+reactive_program =: reactive_program , KINGDOM_POP
+reactive_program =: reactive_program , PROPHECY_NUM
+reactive_program =: reactive_program , 32 , PROPHECY_CHAR
+
+NB Return to main loop
+reactive_program =: reactive_program , 3 , RITUAL_WARP
+
+NB Pad to position 200
+reactive_program =: reactive_program , ((prosperity_handler - #reactive_program) # MEDITATE)
+
+NB ===== PROSPERITY HANDLER =====
+NB Output "GOLD!"
+reactive_program =: reactive_program , 71 , PROPHECY_CHAR    NB 'G'
+reactive_program =: reactive_program , 79 , PROPHECY_CHAR    NB 'O'
+reactive_program =: reactive_program , 76 , PROPHECY_CHAR    NB 'L'
+reactive_program =: reactive_program , 68 , PROPHECY_CHAR    NB 'D'
+reactive_program =: reactive_program , 33 , PROPHECY_CHAR    NB '!'
+reactive_program =: reactive_program , 32 , PROPHECY_CHAR    NB ' '
+
+NB Check total kingdom wealth
+reactive_program =: reactive_program , KINGDOM_APPLES
+reactive_program =: reactive_program , PROPHECY_NUM
+reactive_program =: reactive_program , 32 , PROPHECY_CHAR
+
+NB Return to main loop
+reactive_program =: reactive_program , 3 , RITUAL_WARP
+
+NB Pad to position 300
+reactive_program =: reactive_program , ((dawn_handler - #reactive_program) # MEDITATE)
+
+NB ===== DAWN HANDLER =====
+NB Output "DAWN!"
+reactive_program =: reactive_program , 68 , PROPHECY_CHAR    NB 'D'
+reactive_program =: reactive_program , 65 , PROPHECY_CHAR    NB 'A'
+reactive_program =: reactive_program , 87 , PROPHECY_CHAR    NB 'W'
+reactive_program =: reactive_program , 78 , PROPHECY_CHAR    NB 'N'
+reactive_program =: reactive_program , 33 , PROPHECY_CHAR    NB '!'
+reactive_program =: reactive_program , 32 , PROPHECY_CHAR    NB ' '
+
+NB Get current time
+reactive_program =: reactive_program , DIVINE_TIME
+reactive_program =: reactive_program , PROPHECY_NUM
+reactive_program =: reactive_program , 32 , PROPHECY_CHAR
+
+NB Return to main loop
+reactive_program =: reactive_program , 3 , RITUAL_WARP
+
+NB ===== SECOND WIZARD: Waits for specific event =====
+NB This wizard will be placed at column 400
+NB It waits for FULL_MOON event
+
+wait_program =: i.0
+wait_program =: wait_program , 83 , PROPHECY_CHAR         NB 'S' (sleeping)
+wait_program =: wait_program , EVENT_FULL_MOON , AWAIT_OMEN
+wait_program =: wait_program , 77 , PROPHECY_CHAR         NB 'M' (moon!)
+wait_program =: wait_program , 79 , PROPHECY_CHAR         NB 'O'
+wait_program =: wait_program , 79 , PROPHECY_CHAR         NB 'O'
+wait_program =: wait_program , 78 , PROPHECY_CHAR         NB 'N'
+wait_program =: wait_program , 33 , PROPHECY_CHAR         NB '!'
+wait_program =: wait_program , 32 , PROPHECY_CHAR         NB ' '
+wait_program =: wait_program , BANISH_SELF
+
+NB Combine programs
+full_program =: reactive_program
+full_program =: full_program , ((400 - #full_program) # MEDITATE)
+full_program =: full_program , wait_program
+
+NB Initialize
+init_grid full_program
+
+NB Spawn reactive wizard
+spawn_wizard (0 0 0) ; (0 0 1) ; i.0 ; IMMORTAL ; 0 ; ROLE_WIZARD
+
+NB Spawn waiting wizard  
+spawn_wizard (0 0 400) ; (0 0 1) ; i.0 ; IMMORTAL ; 0 ; ROLE_WIZARD
+
+NB Run for many steps to see events occur
+run_multi full_program ; 2 ; 500 ; IMMORTAL
+
+echo 'Reactive Kingdom Output:'
+echo get_outputs ''
+echo ''
+echo 'Expected output patterns:'
+echo '  W - Normal waiting'
+echo '  RAID! <pop> - When goblin raid occurs'
+echo '  GOLD! <apples> - When prosperity occurs'
+echo '  DAWN! <time> - When dawn occurs'
+echo '  S - Second wizard sleeping'
+echo '  MOON! - When full moon occurs (second wizard wakes)'
